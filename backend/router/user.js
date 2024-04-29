@@ -4,7 +4,7 @@ const z = require("zod");
 const { User } = require("../db/index");
 const jwt = require("jsonwebtoken");
 const  JWT_SECRET  = require("../config");
-
+const { authMiddleware } = require("../middleware/Authmiddleware");
 const signupBody = z.object({
     username: z.string().email(),
     firstname: z.string(),
@@ -65,16 +65,17 @@ router.post("/signin", async (req, res) => {
         username: req.body.username,
         password: req.body.password
     });
-
+    console.log(user)
     if (user) {
+        
         const token = jwt.sign({
-            userId: user._id
+            UserId: user._id
         }, JWT_SECRET);
   
         res.json({
             token: token
         })
-        return;
+        return ;
     }
 
     
@@ -83,7 +84,50 @@ router.post("/signin", async (req, res) => {
     })
 })
 
-  
 
+router.put("/updateProfile", authMiddleware, async (req, res) => {
+    const updateUser = z.object({
+        username: z.string().optional(),
+        password: z.string().optional(),
+        firstname: z.string().optional(),
+        lastname: z.string().optional()
+    });
+    const { success } = updateUser.safeParse(req.body);
+    if (!success) {
+        return res.status(411).json({
+            msg: "Error while updating information"
+        });
+    }
+    console.log(req.body)
+    await User.updateOne({ _id: req.userId }, req.body);
+    return res.json({
+        msg: "User updated successfully!"
+    });
+});
+
+router.get("/search",async(req,res)=>{
+    const filter=req.query.filter
+    console.log(filter)
+    const users=User.find({
+        $or: [{
+            firstname: {
+                "$regex": filter
+            }
+        }, {
+            lastname: {
+                "$regex": filter
+            }
+        }]
+    })
+    res.json({
+        user:(await users).map(user=>({
+            username:user.username,
+            firstname:user.firstname,
+            lastname:user.lastname,
+            _id:user._id
+        }))
+    })
+
+})
 
 module.exports = router;
