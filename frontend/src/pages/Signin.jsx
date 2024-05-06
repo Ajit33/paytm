@@ -7,28 +7,27 @@ import Button from '../components/Button'
 import BottomWarning from '../components/BottomWarning'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
+import { useRecoilState, useSetRecoilState } from 'recoil'
+import { usernameAtom } from '../store/atom/Username'
 
 const Signin = () => {
-
     const [username,setUsername]=useState("");
     const [password,setPassword]=useState("")
     const navigate=useNavigate();
     const handelsignin= async()=>{
         try {
-            
-       
      const response= await axios.post("http://localhost:3000/api/v1/user/signin",{
         username,
         password
      })
-     console.log(response)
      if(response){
-      toast.success("login sucessfully")
-      console.log(`hello ${username}`)
+    localStorage.setItem("token",response.data.token)
+    localStorage.setItem("name",response.data.username)
+    toast.success(`welcome back ${response.data.username}`)
      navigate("/dashboard")
      }
     } catch (error) {
-           console.log("Invalid Credintials") 
+           console.log(error) 
            toast.error("please provid valid credintial")
 
     }

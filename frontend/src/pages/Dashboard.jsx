@@ -5,12 +5,13 @@ import SearchComponent from '../components/SearchComponent'
 
 const Dashboard = () => {
   return (
-    <div>
-        <AppBar />
-        <Ballance />
-        <SearchComponent />
+    <div className=' w-full h-full flex flex-col'>
+      <AppBar />
+      <hr />
+      <Ballance />
+      <SearchComponent />
     </div>
   )
 }
 
-export default Dashboard
+export default Dashboard;
